@@ -1,0 +1,15 @@
+---
+title: "stats506_ps3"
+format: html
+editor: visual
+---
+
+## **Problem 1 - Vision**
+
+This problem will require you to do things in Stata we have not covered. Use the Stata help, or online resources, to figure out the appropriate command(s). Use citation as necessary.
+
+a.  Download the file VIX_D from [this location](http://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component=Examination&CycleBeginYear=2005), and determine how to read it into Stata. Then download the file DEMO_D from [this location](http://wwwn.cdc.gov/Nchs/Nhanes/Search/DataPage.aspx?Component=Demographics&CycleBeginYear=2005). Note that each page contains a link to a documentation file for that data set. Merge the two files to create a single Stata dataset, using the **SEQN** variable for merging. Keep only records which matched. Print our your total sample size, showing that it is now 6,980.
+
+b.  
+
+c.  \
