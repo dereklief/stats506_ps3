@@ -10,6 +10,68 @@ This problem will require you to do things in Stata we have not covered. Use the
 
 a.  Download the file VIX_D from [this location](http://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component=Examination&CycleBeginYear=2005), and determine how to read it into Stata. Then download the file DEMO_D from [this location](http://wwwn.cdc.gov/Nchs/Nhanes/Search/DataPage.aspx?Component=Demographics&CycleBeginYear=2005). Note that each page contains a link to a documentation file for that data set. Merge the two files to create a single Stata dataset, using the **SEQN** variable for merging. Keep only records which matched. Print our your total sample size, showing that it is now 6,980.
 
-b.  
+    First, the do-file input:
 
-c.  \
+    ``` stata
+    import sasxport5 "C:\Users\dlief\Desktop\VIX_D.XPT", clear
+    sort seqn
+    save "C:\Users\dlief\Desktop\ps3_data_1", replace
+
+    import sasxport5 "C:\Users\dlief\Desktop\DEMO_D.XPT", clear
+    sort seqn
+    save "C:\Users\dlief\Desktop\ps3_data_2", replace
+
+    merge 1:1 seqn using "C:\Users\dlief\Desktop\ps3_data_1.dta"
+    keep if _merge==3
+    save "C:\Users\dlief\Desktop\ps3_merged_data", replace
+
+    count
+    ```
+
+    Second, the output:
+
+    ``` stata
+    . do "C:\Users\dlief\Documents\ps3.do"
+
+    . import sasxport5 "C:\Users\dlief\Desktop\VIX_D.XPT", clear
+
+    . sort seqn
+
+    . save "C:\Users\dlief\Desktop\ps3_data_1", replace
+    file C:\Users\dlief\Desktop\ps3_data_1.dta saved
+
+    . 
+    . import sasxport5 "C:\Users\dlief\Desktop\DEMO_D.XPT", clear
+
+    . sort seqn
+
+    . save "C:\Users\dlief\Desktop\ps3_data_2", replace
+    file C:\Users\dlief\Desktop\ps3_data_2.dta saved
+
+    . 
+    . merge 1:1 seqn using "C:\Users\dlief\Desktop\ps3_data_1.dta"
+
+        Result                      Number of obs
+        -----------------------------------------
+        Not matched                         3,368
+            from master                     3,368  (_merge==1)
+            from using                          0  (_merge==2)
+
+        Matched                             6,980  (_merge==3)
+        -----------------------------------------
+
+    . keep if _merge==3
+    (3,368 observations deleted)
+
+    . save "C:\Users\dlief\Desktop\ps3_merged_data", replace
+    file C:\Users\dlief\Desktop\ps3_merged_data.dta saved
+
+    . 
+    . count
+      6,980
+
+    . 
+    end of do-file
+
+    . 
+    ```
