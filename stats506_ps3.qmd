@@ -75,3 +75,134 @@ a.  Download the file VIX_D from [this location](http://wwwn.cdc.gov/nchs/nhane
 
     . 
     ```
+
+b.  Without fitting any models, estimate the proportion of respondents within each 10-year age bracket (e.g. 0-9, 10-19, 20-29, etc) who wear glasses/contact lenses for distance vision. Produce a nice table with the results.
+
+    (Hint: One approach might be to try and find a way to produce this table with a single command. Another might be to estimate each proportion separately and then combine the results somehow. Yet another approach might be to manually do the calculations in Mata. Or any other approach that produces a single nice table.)
+
+    First, the do-file input:
+
+    ``` stata
+    egen year_cat = cut(ridageyr), at(10,20,30,40,50,60,70,80,90)
+    tabstat ridageyr, by(year_cat) stats(min max count)
+
+    gen year_cat_str = "10 to 19" if year_cat == 10
+    replace year_cat_str = "20 to 29" if year_cat == 20
+    replace year_cat_str = "30 to 39" if year_cat == 30
+    replace year_cat_str = "40 to 49" if year_cat == 40
+    replace year_cat_str = "50 to 59" if year_cat == 50
+    replace year_cat_str = "60 to 69" if year_cat == 60
+    replace year_cat_str = "70 to 79" if year_cat == 70
+    replace year_cat_str = "80 to 89" if year_cat == 80
+
+    gen viq220_cat = "Yes" if viq220 == 1
+    replace viq220_cat = "No" if viq220 == 2
+    replace viq220_cat = "DK" if viq220 == 9
+
+    tabulate year_cat_str viq220_cat, row
+    ```
+
+Second, the do-file output (I note that "DK" represents "don't know"):
+
+``` stata
+. egen year_cat = cut(ridageyr), at(10,20,30,40,50,60,70,80,90)
+
+. tabstat ridageyr, by(year_cat) stats(min max count)
+
+Summary for variables: ridageyr
+Group variable: year_cat 
+
+year_cat |       Min       Max         N
+---------+------------------------------
+      10 |        12        19      2207
+      20 |        20        29      1021
+      30 |        30        39       818
+      40 |        40        49       815
+      50 |        50        59       631
+      60 |        60        69       661
+      70 |        70        79       469
+      80 |        80        85       358
+---------+------------------------------
+   Total |        12        85      6980
+----------------------------------------
+
+. 
+. gen year_cat_str = "10 to 19" if year_cat == 10
+(4,773 missing values generated)
+
+. replace year_cat_str = "20 to 29" if year_cat == 20
+(1,021 real changes made)
+
+. replace year_cat_str = "30 to 39" if year_cat == 30
+(818 real changes made)
+
+. replace year_cat_str = "40 to 49" if year_cat == 40
+(815 real changes made)
+
+. replace year_cat_str = "50 to 59" if year_cat == 50
+(631 real changes made)
+
+. replace year_cat_str = "60 to 69" if year_cat == 60
+(661 real changes made)
+
+. replace year_cat_str = "70 to 79" if year_cat == 70
+(469 real changes made)
+
+. replace year_cat_str = "80 to 89" if year_cat == 80
+(358 real changes made)
+
+. 
+. gen viq220_cat = "Yes" if viq220 == 1
+(4,215 missing values generated)
+
+. replace viq220_cat = "No" if viq220 == 2
+(3,780 real changes made)
+
+. replace viq220_cat = "DK" if viq220 == 9
+(2 real changes made)
+
+. 
+. tabulate year_cat_str viq220_cat, row
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+year_cat_s |            viq220_cat
+        tr |        DK         No        Yes |     Total
+-----------+---------------------------------+----------
+  10 to 19 |         0      1,418        670 |     2,088 
+           |      0.00      67.91      32.09 |    100.00 
+-----------+---------------------------------+----------
+  20 to 29 |         2        631        306 |       939 
+           |      0.21      67.20      32.59 |    100.00 
+-----------+---------------------------------+----------
+  30 to 39 |         0        481        269 |       750 
+           |      0.00      64.13      35.87 |    100.00 
+-----------+---------------------------------+----------
+  40 to 49 |         0        487        286 |       773 
+           |      0.00      63.00      37.00 |    100.00 
+-----------+---------------------------------+----------
+  50 to 59 |         0        274        335 |       609 
+           |      0.00      44.99      55.01 |    100.00 
+-----------+---------------------------------+----------
+  60 to 69 |         0        238        392 |       630 
+           |      0.00      37.78      62.22 |    100.00 
+-----------+---------------------------------+----------
+  70 to 79 |         0        148        299 |       447 
+           |      0.00      33.11      66.89 |    100.00 
+-----------+---------------------------------+----------
+  80 to 89 |         0        103        208 |       311 
+           |      0.00      33.12      66.88 |    100.00 
+-----------+---------------------------------+----------
+     Total |         2      3,780      2,765 |     6,547 
+           |      0.03      57.74      42.23 |    100.00 
+
+. 
+end of do-file
+```
+
+I note that the $2,765$ number I get above (for total wearers of contacts/glasses across the age groups) aligns with the number provided in the documentation here: <https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/VIX_D.htm#VIQ220>, which represents a quick check.
