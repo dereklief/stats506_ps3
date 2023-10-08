@@ -206,3 +206,213 @@ end of do-file
 ```
 
 I note that the $2,765$ number I get above (for total wearers of contacts/glasses across the age groups) aligns with the number provided in the documentation here: <https://wwwn.cdc.gov/Nchs/Nhanes/2005-2006/VIX_D.htm#VIQ220>, which represents a quick check.
+
+c\. Fit three logistic regression models predicting whether a respondent wears glasses/contact lenses for distance vision. Predictors:
+
+1.  age
+
+2.  age, race, gender
+
+3.  age, race, gender, Poverty Income ratio
+
+Produce a table presenting the estimated odds ratios for the coefficients in each model, along with the sample size for the model, the pseudo-$R^2$ , and AIC values.
+
+First, I note that I eliminated observations that indicated they did not know whether they wore contacts or glasses OR they were missing. In short, I was left with $6,545$ observations of people who either had contacts/glasses or did not. This is the data I used to estimate my models. For the first, model, my do file was as follows (this includes the manipulation to get the data just including those who have contacts/glasses or do not):
+
+``` stata
+keep if (viq220 <= 2) 
+gen viq220_log = 0 if viq220==2
+replace viq220_log = 1 if viq220==1
+
+logit viq220_log ridageyr
+estat ic
+```
+
+And the output:
+
+``` stata
+. keep if (viq220 <= 2) 
+(435 observations deleted)
+
+. gen viq220_log = 0 if viq220==2
+(2,765 missing values generated)
+
+. replace viq220_log = 1 if viq220==1
+(2,765 real changes made)
+
+. logit viq220_log ridageyr
+
+Iteration 0:  Log likelihood = -4457.6265  
+Iteration 1:  Log likelihood = -4236.2351  
+Iteration 2:  Log likelihood = -4235.9433  
+Iteration 3:  Log likelihood = -4235.9433  
+
+Logistic regression                                     Number of obs =  6,545
+                                                        LR chi2(1)    = 443.37
+                                                        Prob > chi2   = 0.0000
+Log likelihood = -4235.9433                             Pseudo R2     = 0.0497
+
+------------------------------------------------------------------------------
+  viq220_log | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    ridageyr |   .0246729   .0012055    20.47   0.000     .0223101    .0270357
+       _cons |   -1.26097   .0534482   -23.59   0.000    -1.365727   -1.156213
+------------------------------------------------------------------------------
+
+. estat ic
+
+Akaike's information criterion and Bayesian information criterion
+
+-----------------------------------------------------------------------------
+       Model |          N   ll(null)  ll(model)      df        AIC        BIC
+-------------+---------------------------------------------------------------
+           . |      6,545  -4457.627  -4235.943       2   8475.887    8489.46
+-----------------------------------------------------------------------------
+Note: BIC uses N = number of observations. See [R] IC note.
+
+. 
+end of do-file
+```
+
+For the second model, I made female == 0 as opposed to 2 (this is just more intuitive to me). Then I ran the model. My do-file input is below:
+
+``` stata
+gen riagendr_log = 0 if riagendr==2
+replace riagendr_log = 1 if riagendr==1
+
+logit viq220_log c.ridageyr i.riagendr_log
+estat ic
+```
+
+And the output:
+
+``` stata
+. gen riagendr_log = 0 if riagendr==2
+(3,195 missing values generated)
+
+. replace riagendr_log = 1 if riagendr==1
+(3,195 real changes made)
+
+. logit viq220_log c.ridageyr i.riagendr_log
+
+Iteration 0:  Log likelihood = -4457.6265  
+Iteration 1:  Log likelihood = -4191.5745  
+Iteration 2:  Log likelihood = -4190.7367  
+Iteration 3:  Log likelihood = -4190.7366  
+
+Logistic regression                                     Number of obs =  6,545
+                                                        LR chi2(2)    = 533.78
+                                                        Prob > chi2   = 0.0000
+Log likelihood = -4190.7366                             Pseudo R2     = 0.0599
+
+--------------------------------------------------------------------------------
+    viq220_log | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+      ridageyr |   .0254386   .0012207    20.84   0.000     .0230462    .0278311
+1.riagendr_log |   -.496538   .0525275    -9.45   0.000      -.59949   -.3935861
+         _cons |  -1.052571    .057459   -18.32   0.000    -1.165188   -.9399532
+--------------------------------------------------------------------------------
+
+. estat ic
+
+Akaike's information criterion and Bayesian information criterion
+
+-----------------------------------------------------------------------------
+       Model |          N   ll(null)  ll(model)      df        AIC        BIC
+-------------+---------------------------------------------------------------
+           . |      6,545  -4457.627  -4190.737       3   8387.473   8407.832
+-----------------------------------------------------------------------------
+Note: BIC uses N = number of observations. See [R] IC note.
+
+. 
+end of do-file
+```
+
+And lastly, the do-file for the third model:
+
+``` stata
+logit viq220_log c.ridageyr i.riagendr_log c.indfmpir
+estat ic
+```
+
+And the output:
+
+``` stata
+. logit viq220_log c.ridageyr i.riagendr_log c.indfmpir
+
+Iteration 0:  Log likelihood = -4259.5533  
+Iteration 1:  Log likelihood = -3974.5323  
+Iteration 2:  Log likelihood = -3973.1801  
+Iteration 3:  Log likelihood = -3973.1798  
+
+Logistic regression                                     Number of obs =  6,247
+                                                        LR chi2(3)    = 572.75
+                                                        Prob > chi2   = 0.0000
+Log likelihood = -3973.1798                             Pseudo R2     = 0.0672
+
+--------------------------------------------------------------------------------
+    viq220_log | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+      ridageyr |   .0239921     .00126    19.04   0.000     .0215224    .0264617
+1.riagendr_log |  -.5190046   .0540545    -9.60   0.000    -.6249495   -.4130597
+      indfmpir |   .1519579   .0168443     9.02   0.000     .1189436    .1849722
+         _cons |  -1.362932   .0712438   -19.13   0.000    -1.502567   -1.223296
+--------------------------------------------------------------------------------
+
+. estat ic
+
+Akaike's information criterion and Bayesian information criterion
+
+-----------------------------------------------------------------------------
+       Model |          N   ll(null)  ll(model)      df        AIC        BIC
+-------------+---------------------------------------------------------------
+           . |      6,247  -4259.553   -3973.18       4    7954.36   7981.319
+-----------------------------------------------------------------------------
+Note: BIC uses N = number of observations. See [R] IC note.
+
+. 
+end of do-file
+```
+
+The assignment also asks us to produce a table presenting the estimated odds ratios for the coefficients in each model, along with the sample size for the model, the pseudo-$R^2$ and AIC values. To do this, I wrote the following do-file code:
+
+``` stata
+quietly logit viq220_log ridageyr
+estimates store e1
+
+quietly logit viq220_log c.ridageyr i.riagendr_log
+estimates store e2
+
+quietly logit viq220_log c.ridageyr i.riagendr_log c.indfmpir
+estimates store e3
+
+etable, column(index) estimates(e1 e2 e3) mstat(r2_p) mstat(aic) showstars showstarsnote note(DV=contacts_glasses)
+```
+
+And the output is as follows:
+
+``` stata
+. etable, column(index) estimates(e1 e2 e3) mstat(r2_p) mstat(aic) showstars show
+> starsnote note(DV=contacts_glasses)
+
+----------------------------------------------------------------------
+                                           1          2          3    
+----------------------------------------------------------------------
+Age at Screening Adjudicated - Recode   0.025 **   0.025 **   0.024 **
+                                      (0.001)    (0.001)    (0.001)   
+riagendr_log                                                          
+  1                                               -0.497 **  -0.519 **
+                                                 (0.053)    (0.054)   
+Family PIR                                                    0.152 **
+                                                            (0.017)   
+Intercept                              -1.261 **  -1.053 **  -1.363 **
+                                      (0.053)    (0.057)    (0.071)   
+Pseudo R-squared                         0.05       0.06       0.07   
+AIC                                   8475.89    8387.47    7954.36   
+----------------------------------------------------------------------
+** p<.01, * p<.05
+DV=contacts_glasses
+
+. 
+end of do-file
+```
