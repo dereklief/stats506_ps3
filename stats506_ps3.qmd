@@ -416,3 +416,61 @@ DV=contacts_glasses
 . 
 end of do-file
 ```
+
+d\. From the third model from the previous part, discuss whether the *odds* of men and women being wears of glasess/contact lenses for distance vision differs. Test whether the *proportion* of wearers of glasses/contact lenses for distance vision differs between men and women. Include the results of the test and its interpretation.
+
+We see that the coefficient on gender in the third model is $-0.519$ and that it is statistically significant at the $0.01$ level. What this means is that holding Family PIR and age at screening, being male yields a $0.519$ decrease in $log(p)$ , or \$log(p/1-p)\$. Now, $exp(-0.519) = 0.595$ which implies that the odds of wearing glasses/contacts for males is $0.595$ times that of females (i.e. less).
+
+For the second part of this question, to test whether the $proportion$ of wearers of glasses/contacts for distance vision, differs between men and women, I conducted two simple t-tests (one assuming equal variance and the other assuming unequal variance). I note that the t-test works to test proportions here because I coded the glasses/contacts variable as $0$ (if they don't have) or $1$ if they do. In both cases, the t-tests show that the proportions are statistically significantly different between men and women, with men less likely to to wear contacts/glasses when compared to women (which aligns with the results from our logistic regression too). Below, I present the do-file input followed by the stata output:
+
+``` stata
+ttest viq220_log, by(riagendr_log)
+ttest viq220_log, by(riagendr_log) unequal
+```
+
+And the output:
+
+``` stata
+. ttest viq220_log, by(riagendr_log)
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |   3,350    .4728358    .0086272    .4993361    .4559207     .489751
+       1 |   3,195    .3696401    .0085412    .4827828    .3528934    .3863868
+---------+--------------------------------------------------------------------
+Combined |   6,545    .4224599    .0061061    .4939887      .41049    .4344298
+---------+--------------------------------------------------------------------
+    diff |            .1031958    .0121497                .0793784    .1270132
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =   8.4937
+H0: diff = 0                                     Degrees of freedom =     6543
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 1.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 0.0000
+
+. ttest viq220_log, by(riagendr_log) unequal
+
+Two-sample t test with unequal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |   3,350    .4728358    .0086272    .4993361    .4559207     .489751
+       1 |   3,195    .3696401    .0085412    .4827828    .3528934    .3863868
+---------+--------------------------------------------------------------------
+Combined |   6,545    .4224599    .0061061    .4939887      .41049    .4344298
+---------+--------------------------------------------------------------------
+    diff |            .1031958      .01214                .0793974    .1269942
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =   8.5005
+H0: diff = 0                     Satterthwaite's degrees of freedom =  6541.78
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 1.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 0.0000
+
+. 
+end of do-file
+```
+
+## **Problem 2 - Sakila**
