@@ -593,4 +593,13 @@ b\. What proportion of email addresses have at least one non alphanumeric charac
 
 ```{r}
 
+email_un <- lapply(emails, FUN = function(x) strsplit(x, split="@")[[1]][1])
+#(NOTE: I used help from this for extracting the first element: https://stackoverflow.com/questions/33683862/first-entry-from-string-split)
+email_un <- paste(unlist(email_un))
+emails_na <- email_un[grepl("[^a-zA-Z0-9]+", email_un)]
+length(emails_na) / nrow(us500)
 ```
+
+$0.506$ of the email addresses have at least one non alphanumeric character in them.
+
+c\.
