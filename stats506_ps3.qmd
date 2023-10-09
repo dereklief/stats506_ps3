@@ -474,3 +474,123 @@ end of do-file
 ```
 
 ## **Problem 2 - Sakila**
+
+Load the \"sakila\" database discussed in class into SQLite. It can be downloaded from <https://github.com/bradleygrant/sakila-sqlite3>.
+
+```{r}
+library(RSQLite)
+library(DBI)
+sakila <- dbConnect(RSQLite::SQLite(), "/Users/dereklief/Desktop/SQLite/sakila_master.db")
+```
+
+a.  Aside from English, what language is most common for films? Answer this with a single SQL query.
+
+The query below suggests that English is the only language used in the films (but I limit it to 20 to keep it from going to 4,581 - the number of films in the inventory):
+
+```{r}
+dbGetQuery(sakila, "SELECT i.film_id, i.inventory_id, f.title, l.name, l.language_id
+                    FROM film as f
+                    INNER JOIN inventory as i ON i.film_id = f.film_id
+                    INNER JOIN language as l ON f.language_id = l.language_id
+                    GROUP BY i.inventory_id
+                    limit 20")
+
+```
+
+So if I had to use one line of code, I would use the below, which shows us that indeed, across three variables, English is the only language used.
+
+```{r}
+dbGetQuery(sakila, "SELECT COUNT(DISTINCT l.name), COUNT(DISTINCT l.language_id), COUNT(DISTINCT f.language_id)
+                    FROM film as f
+                    INNER JOIN inventory as i ON i.film_id = f.film_id
+                    INNER JOIN language as l ON f.language_id = l.language_id")
+```
+
+For each of the following question, solve them in two ways: First, use SQL query or queries to extract the appropriate table(s), then use regular R to answer the question. Second, use a single SQL query to answer the question.
+
+b.  What genre of movie is the most common in the data, and how many movies are of this genre?
+
+First, let's use SQL query (or queries) and R to do this.
+
+```{r}
+df_1 <- dbGetQuery(sakila, "SELECT i.inventory_id, f.title, c.name
+                    FROM film as f
+                    INNER JOIN inventory as i ON i.film_id = f.film_id
+                    INNER JOIN film_category as fc ON fc.film_id = f.film_id
+                    INNER JOIN category as c ON c.category_id = fc.category_id")
+table(df_1$name)
+remove(df_1)
+```
+
+This R function (combined with the SQL query) shows us that "Sports" is the most common category of film with $344$.
+
+For a single SQL query, I would do the following:
+
+```{r}
+dbGetQuery(sakila, "SELECT c.name, COUNT(*)
+                    FROM film as f
+                    INNER JOIN inventory as i ON i.film_id = f.film_id
+                    INNER JOIN film_category as fc ON fc.film_id = f.film_id
+                    INNER JOIN category as c ON c.category_id = fc.category_id
+                    GROUP BY c.name")
+
+```
+
+And we can see just by eye that "Sports" has the greatest number of entries with $344$.
+
+c\. Identify which country or countries have exactly 9 customers. Answer this with a single SQL query.
+
+First, let's do this with R followed by SQL:
+
+```{r}
+library(janitor)
+df_2 <- dbGetQuery(sakila, "SELECT cou.country_id, cou.country, cust.customer_id
+                    FROM city as cit
+                    INNER JOIN country as cou ON cou.country_id = cit.country_id
+                    INNER JOIN address as a ON a.city_id = cit.city_id
+                    INNER JOIN customer as cust ON cust.address_id = a.address_id")
+
+library(dplyr)
+df_3 <- df_2 %>%count(country)
+df_3[df_3$n == 9,]
+remove(df_2)
+remove(df_3)
+```
+
+We see that just the United Kingdom has nine customers. Now let's do this with SQL.
+
+```{r}
+dbGetQuery(sakila, "SELECT cou.country, COUNT(*)
+                    FROM city as cit
+                    INNER JOIN country as cou ON cou.country_id = cit.country_id
+                    INNER JOIN address as a ON a.city_id = cit.city_id
+                    INNER JOIN customer as cust ON cust.address_id = a.address_id
+                    GROUP BY cou.country
+                    HAVING COUNT(*)==9")
+```
+
+And we see the same result above.
+
+## **Problem 3 - US Records**
+
+Download the \"US - 500 Records\" data from <https://www.briandunning.com/sample-data/> and import it into R. This is entirely fake data - use it to answer the following questions.
+
+```{r}
+us500 <- read.csv("/Users/dereklief/Desktop/MAIN FOLDER/Classes and Other/STATS 506/PS 3/stats506_ps3/us-500.csv", header = TRUE)
+```
+
+a.  What proportion of email addresses are hosted at a domain with TLD \".net\"? (E.g. in the email, \"angrycat\@freemail.org\", \"freemail.org\" is the domain, with TLD (top-level domain) \".org\".)
+
+```{r}
+emails <- c(us500$email)
+emails_net <- emails[grepl(".*\\.[n][e][t]", emails)]
+length(emails_net) / nrow(us500)
+```
+
+$0.14$ of the emails are hosted a domain with TLD ".net".
+
+b\. What proportion of email addresses have at least one non alphanumeric character in them? (Excluding the required \"`@`\" and \"`.`\" found in every email address.)
+
+```{r}
+
+```
