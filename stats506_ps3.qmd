@@ -598,8 +598,45 @@ email_un <- lapply(emails, FUN = function(x) strsplit(x, split="@")[[1]][1])
 email_un <- paste(unlist(email_un))
 emails_na <- email_un[grepl("[^a-zA-Z0-9]+", email_un)]
 length(emails_na) / nrow(us500)
+remove(email_un)
+remove(emails_na)
 ```
 
 $0.506$ of the email addresses have at least one non alphanumeric character in them.
 
-c\.
+c\. What is the most common area code amongst all phone numbers?
+
+```{r}
+pn_1 <- c(us500$phone1)
+area_code_1 <- lapply(pn_1, FUN = function(x) strsplit(x, split="-")[[1]][1])
+area_code_1_vec <- paste(unlist(area_code_1))
+sort(table(area_code_1_vec),decreasing=TRUE)[1:3]
+
+pn_2 <- c(us500$phone2)
+area_code_2 <- lapply(pn_2, FUN = function(x) strsplit(x, split="-")[[1]][1])
+area_code_2_vec <- paste(unlist(area_code_2))
+sort(table(area_code_2_vec),decreasing=TRUE)[1:3]
+remove(pn_1)
+remove(area_code_1)
+remove(area_code_1_vec)
+
+remove(pn_2)
+remove(area_code_2)
+remove(area_code_2_vec)
+```
+
+The most common area code for both lists is \$973\$, and a quick glance makes clear that the numbers from $phone1$ and $phone2$ are the same.
+
+d\. Produce a histogram of the log of the apartment numbers for all addresses. (You may assume any number after the street is an apartment number.
+
+```{r}
+address <- c(us500$address)
+apt_num <- address[grepl("#", address)]
+apt_num <- lapply(apt_num, FUN = function(x) strsplit(x, split="#")[[1]][2])
+apt_num_vec <- paste(unlist(apt_num))
+remove(apt_num)
+log_apt_num <- lapply(apt_num_vec, FUN = function(x) log(as.numeric(x)))
+log_apt_num_vec <- paste(unlist(log_apt_num))
+log_apt_num_vec <- as.numeric(log_apt_num_vec)
+hist(log_apt_num_vec, main = "Log of Apartment Number")
+```
