@@ -658,3 +658,14 @@ plot(h,freq=FALSE, main = "Leading Number Benford Test")
 Undoubtedly, the leading numbers would not pass the Benford Test. First, the number $1$ clearly does not appear as the leading significant digit about 30 $\%$ of the time (it's 20) and $9$ is not less than 5 $\%$.
 
 f\. Repeat your analysis of Benford\'s law on the *last* digit of the street number. (E.g. if your address is \"123 Main St #25\", your street number is \"123\".)
+
+```{r}
+library(stringr)
+benford_test_2 <- str_sub(apt_num_vec, -1, -1)
+benford_test_2 <- as.numeric(benford_test_2)
+h_2 = hist(benford_test_2, plot = FALSE)
+h_2$density = h_2$counts/sum(h_2$counts)*100
+plot(h_2,freq=FALSE, main = "Last Number Benford Test")
+```
+
+This plot suggests that the last numbers are more likely to pass as real data (although still wouldn't) given that the distribution decreases (but the number $1$ clearly does not appear as the leading significant digit about 30 $\%$ and $9$ is not less than 5 $\%$ .
